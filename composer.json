@@ -1,6 +1,5 @@
 {
-    "name": "duncanoneil/eav",
-    "version": "1.0.0",
+    "name": "quickapps-plugins/eav",
     "description": "Provides EAV (Entity-Attribute-Value) design pattern.",
     "type": "cakephp-plugin",
     "keywords": ["framework", "cms", "cmf", "quickapps", "plugin", "model", "database", "eav"],
