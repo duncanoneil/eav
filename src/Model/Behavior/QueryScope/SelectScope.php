@@ -66,7 +66,7 @@ class SelectScope implements QueryScopeInterface
      */
     public function scope(Query $query, $bundle = null)
     {
-        $this->getVirtualColumns($query, $bundle);
+        //$this->getVirtualColumns($query, $bundle);
 
         return $query;
     }
