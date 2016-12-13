@@ -116,6 +116,8 @@ class EavBehavior extends Behavior
             'addColumn' => 'addColumn',
             'dropColumn' => 'dropColumn',
             'listColumns' => 'listColumns',
+            'getColumn' => 'getColumn',
+            'validateColumn' => 'validateColumn',
         ],
     ];
 
@@ -319,6 +321,9 @@ class EavBehavior extends Behavior
                 'id' => $attr->get('id'),
                 'bundle' => $attr->get('bundle'),
                 'name' => $name,
+                'title' => $attr->get('title'),
+                'validation' => $attr->get('validation'),
+                'hint' => $attr->get('hint'),
                 'type' => $attr->get('type'),
                 'searchable ' => $attr->get('searchable'),
                 'extra ' => $attr->get('extra'),
@@ -326,6 +331,129 @@ class EavBehavior extends Behavior
         }
 
         return $columns;
+    }
+
+    /**
+     * Gets a single virtual column attached to this table.
+     *
+     * @param string $name The attribute name to return
+     * @param string|null $bundle Get attributes within given bundle, or all of them
+     *  regardless of the bundle if not provided
+     * @return array|bool Column information, or false
+     */
+    public function getColumn($name, $bundle = null)
+    {
+        $columns = $this->_toolbox->attributes($bundle);
+        if (!empty($columns) && !empty($columns[$name])) {
+            $attr = $columns[$name];
+            return [
+                'id' => $attr->get('id'),
+                'bundle' => $attr->get('bundle'),
+                'name' => $name,
+                'title' => $attr->get('title'),
+                'validation' => $attr->get('validation'),
+                'hint' => $attr->get('hint'),
+                'type' => $attr->get('type'),
+                'searchable ' => $attr->get('searchable'),
+                'extra ' => $attr->get('extra'),
+            ];
+        }
+        return false;
+    }
+
+    /**
+     * Validates the value for storage in a virtual column.
+     *
+     * @param string $name The attribute name to check against
+     * @param string $value The value to be saved
+     * @param string|null $bundle Limit the attributes within given bundle, or all of them
+     *  regardless of the bundle if not provided
+     * @return bool
+     */
+    public function validateColumn($name, $value, $bundle = null)
+    {
+        $column = $this->getColumn($name, $bundle);
+        if (empty($column['validation'])) {
+            return true;
+        }
+        else {
+            //@TODO Validation methods for other types, external functions?
+            try {
+                switch ($column['type']) {
+                    case 'string':
+                        return $this->validateString($value, $column['validation']);
+                        break;
+                    case 'integer':
+                        return $this->validateInteger($value, $column['validation']);
+                        break;
+                    default:
+                        return true;
+                        break;
+                }
+            } catch (\Exception $e) {
+                return false;
+            }
+        }
+    }
+
+    /**
+     * Validates strings.
+     *
+     * @param string $value The value to be checked
+     * @param string $validation The validation rules:
+     *                              =###, <###, >### - Checks the string length of the value against ###
+     *                              Any other string is used for preg_match comparison
+     * @return bool
+     */
+    private function validateString ($value, $validation)
+    {
+        $check = substr($validation, 0, 1);
+        if (in_array($check, ['<', '>', '='])) {
+            $against = substr($validation, 1);
+            switch($check) {
+                case '<':
+                    return strlen($value) < $against;
+                    break;
+                case '>':
+                    return strlen($value) > $against;
+                    break;
+                case '=':
+                    return strlen($value) == $against;
+                    break;
+            }
+        }
+        if (@preg_match($validation, $value)) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Validates integers.
+     *
+     * @param string $value The value to be checked
+     * @param string $validation The validation rules:
+     *                              =###, <###, >### - Checks that the value is equal, less than or greater than ###
+     * @return bool
+     */
+    private function validateInteger ($value, $validation)
+    {
+        $check = substr($validation, 0, 1);
+        if (in_array($check, ['<', '>', '='])) {
+            $against = substr($validation, 1);
+            switch($check) {
+                case '<':
+                    return $value < $against;
+                    break;
+                case '>':
+                    return $value > $against;
+                    break;
+                case '=':
+                    return $value == $against;
+                    break;
+            }
+        }
+        return false;
     }
 
     /**
