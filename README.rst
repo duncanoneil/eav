@@ -174,6 +174,77 @@ keys:
 - searchable (bool): Whether this attribute can be used in SQL's "WHERE" clauses.
   Defaults to **true**
 
+- title (string): (Optional) A title for the column
+
+- validation (string): (Optional) See Validation, below
+
+- hint (string): (Optional) See Validation, below
+
+Validation
+----------
+
+Pass a validation string to the ``addColumn()`` method in order to allow for validation
+to occur against any values. You may also save a hint to remind future visitors of
+the validation requirements
+
+Validation is not currently enforced, but can be checked with a call to ``validateColumn()``
+
+.. code:: php
+
+    $this->addColumn('user-email', [
+        'title' => 'EMail Address',
+        'type' => 'string', 
+        'validation' => '/[^ ]+@[^ ]+/i',
+        'hint' => 'Must contain an @ symbol'
+        'bundle' => 'admin'
+    ]);
+
+    $this->validateColumn('user-email', 'a@b.com'); //returns true
+    $this->validateColumn('user-email', 'cedric'); //returns false
+
+Fetching Columns
+----------------
+
+A call to ``listColumns()`` will return all the virtual columns added to an Entity, while 
+``getColumn()`` will return just a single column's definition. Both can be filtered down by
+passing a 'bundle' to the method.
+
+.. code:: php
+
+    $this->listColumns();
+
+.. returns::
+
+    ['user-email' => [
+        'id' => 1,
+        'bundle' => 'admin',
+        'name' => 'user-email',
+        'title' => 'EMail Address',
+        'validation' => '/[^ ]+@[^ ]+/i',
+        'hint' => 'must contain an @ symbol',
+        'type' => 'string',
+        'searchable ' => true,
+        'extra ' => '',
+    ]];    
+
+.. code:: php
+
+    $this->getColumn('user-email');
+
+.. returns::
+
+    [
+        'id' => 1,
+        'bundle' => 'admin',
+        'name' => 'user-email',
+        'title' => 'EMail Address',
+        'validation' => '/[^ ]+@[^ ]+/i',
+        'hint' => 'must contain an @ symbol',
+        'type' => 'string',
+        'searchable ' => true,
+        'extra ' => ''
+    ];
+
 
 Dropping Virtual Columns
 ------------------------
