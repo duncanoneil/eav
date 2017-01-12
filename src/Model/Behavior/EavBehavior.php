@@ -117,6 +117,7 @@ class EavBehavior extends Behavior
             'dropColumn' => 'dropColumn',
             'listColumns' => 'listColumns',
             'getColumn' => 'getColumn',
+            'listBundles' => 'listBundles',
             'validateColumn' => 'validateColumn',
         ],
     ];
@@ -255,7 +256,7 @@ class EavBehavior extends Behavior
             ->where([
                 'name' => $data['name'],
                 'table_alias' => $data['table_alias'],
-                'bundle IS' => $data['bundle'],
+                //'bundle IS' => $data['bundle'],
             ])
             ->limit(1)
             ->first();
@@ -309,14 +310,17 @@ class EavBehavior extends Behavior
     /**
      * Gets a list of virtual columns attached to this table.
      *
-     * @param string|null $bundle Get attributes within given bundle, or all of them
-     *  regardless of the bundle if not provided
+     * @param string|false|null $bundle Get attributes within given bundle, only attributes without a bundle name,
+     *  or all of them regardless of the bundle if not provided
      * @return array Columns information indexed by column name
      */
     public function listColumns($bundle = null)
     {
         $columns = [];
         foreach ($this->_toolbox->attributes($bundle) as $name => $attr) {
+            if ($bundle === false && !empty($attr->get('bundle'))) {
+                continue;
+            }
             $columns[$name] = [
                 'id' => $attr->get('id'),
                 'bundle' => $attr->get('bundle'),
@@ -359,6 +363,24 @@ class EavBehavior extends Behavior
             ];
         }
         return false;
+    }
+
+    /**
+     * Gets a list of all bundles used by this table.
+     *
+     * @return array Bundle names
+     */
+    public function listBundles()
+    {
+        $bundles = [];
+        foreach ($this->_toolbox->attributes() as $name => $attr) {
+            if (!empty($attr->get('bundle'))) {
+                $bundles[] = $attr->get('bundle');
+            }
+        }
+        $bundles = array_unique($bundles);
+        $bundles = array_combine($bundles, $bundles);
+        return $bundles;
     }
 
     /**
@@ -877,3 +899,4 @@ class EavBehavior extends Behavior
         }
     }
 }
+
