@@ -760,6 +760,7 @@ class EavBehavior extends Behavior
         $attrsById = [];
         $updatedAttrs = [];
         $valuesTable = TableRegistry::get('Eav.EavValues');
+        $valueHistoryTable = TableRegistry::get('Eav.EavValueHistory');
 
         foreach ($this->_toolbox->attributes() as $name => $attr) {
             if (!$this->_toolbox->propertyExists($entity, $name)) {
@@ -783,6 +784,15 @@ class EavBehavior extends Behavior
             $updatedAttrs[] = $value->get('eav_attribute_id');
             $info = $attrsById[$value->get('eav_attribute_id')];
             $type = $this->_toolbox->getType($info->get('name'));
+
+            $valueHistory = $valueHistoryTable->newEntity([
+                'eav_value_id' => $value->get('id'),
+                'extra' => $value->get('extra'),
+                'public_notes' => $value->get('public_notes'),
+                'private_notes' => $value->get('private_notes')
+            ]);
+            $valueHistory->set("value_{$type}", $value->get("value_{$type}"));
+            $valueHistoryTable->save($valueHistory);
 
             $marshaledValue = $this->_toolbox->marshal($entity->get($info->get('name')), $type);
             $public_notes = $entity->get('public_notes');

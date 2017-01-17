@@ -14,11 +14,10 @@ namespace Eav\Model\Entity;
 use Cake\ORM\Entity;
 
 /**
- * Represents a "eav_value" within the "eav_values" database table.
+ * Represents a "eav_value_history" within the "eav_value_history" database table.
  *
  * @property int $id
- * @property int $entity_id
- * @property string $attribute
+ * @property int $value_id
  * @property string $table_alias
  * @property object $value_datetime
  * @property float $value_decimal
@@ -29,6 +28,6 @@ use Cake\ORM\Entity;
  * @property string $public_notes
  * @property string $private_notes
  */
-class EavValue extends Entity
+class EavValueHistory extends Entity
 {
 }
