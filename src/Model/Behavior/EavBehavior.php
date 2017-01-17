@@ -642,6 +642,14 @@ class EavBehavior extends Behavior
             if (!$this->_toolbox->propertyExists($entity, $value['property_name'])) {
                 $entity->set($value['property_name'], $value['value']);
                 $entity->dirty($value['property_name'], false);
+
+                $public_notes = $value['property_name'] . '__public_notes';
+                $entity->set($public_notes, $value['public_notes']);
+                $entity->dirty($public_notes, false);
+
+                $private_notes = $value['property_name'] . '__private_notes';
+                $entity->set($private_notes, $value['private_notes']);
+                $entity->dirty($private_notes, false);
             }
         }
 
@@ -707,6 +715,8 @@ class EavBehavior extends Behavior
                     'entity_id' => $value->get('entity_id'),
                     'property_name' => is_string($alias) ? $alias : $attrName,
                     'value' => $this->_toolbox->marshal($value->get("value_{$attrType}"), $attrType),
+                    'public_notes' => $value->get('public_notes'),
+                    'private_notes' => $value->get('private_notes'),
                 ];
             })
             ->groupBy('entity_id')
@@ -775,7 +785,12 @@ class EavBehavior extends Behavior
             $type = $this->_toolbox->getType($info->get('name'));
 
             $marshaledValue = $this->_toolbox->marshal($entity->get($info->get('name')), $type);
+            $public_notes = $entity->get('public_notes');
+            $private_notes = $entity->get('private_notes');
+
             $value->set("value_{$type}", $marshaledValue);
+            $value->set("public_notes", $public_notes);
+            $value->set("private_notes", $private_notes);
             $entity->set($info->get('name'), $marshaledValue);
             $valuesTable->save($value);
         }
